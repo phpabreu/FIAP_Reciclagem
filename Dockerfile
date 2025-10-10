@@ -1,36 +1,33 @@
-# Usa a imagem oficial do Eclipse Temurin (OpenJDK) para criar a imagem de BUILD
-FROM eclipse-temurin:21-jdk-alpine AS build
+# Build
+FROM maven:3.9.8-eclipse-temurin-21 AS build
 
 # Define o diretório de trabalho dentro do container
-WORKDIR /app
-
-# Copia o arquivo Maven pom.xml
-COPY pom.xml .
-
-# Copia o código fonte do projeto
-COPY src ./src
-
-# Executa o build do Maven. 
-# O comando 'clean package' compila e cria o JAR. 
-# O parâmetro -DskipTests=true é adicionado AQUI para que o build 
-# no Docker não rode os testes *novamente* (eles já rodaram na pipeline).
-RUN --mount=type=cache,target=/root/.m2 mvn clean package -DskipTests=true
-
-# --- FASE DE EXECUÇÃO (Runtime) ---
-# Usa uma imagem menor e mais leve, otimizada para rodar o JAR (economia de espaço)
-FROM eclipse-temurin:21-jre-alpine
-
-# Define o argumento ARGS, que será o nome do JAR gerado
-ARG JAR_FILE=target/*.jar
-
-# Define o diretório de trabalho
 WORKDIR /opt/app
 
-# Copia o arquivo JAR da fase de build para a fase de execução
-COPY --from=build /app/${JAR_FILE} app.jar
+# Copia apenas o pom.xml e baixa as dependências para aproveitar o cache do Docker
+COPY pom.xml .
+RUN mvn dependency:go-offline
 
-# Expõe a porta que o Spring Boot usa (padrão 8080)
+# Copia o código-fonte do projeto
+COPY src ./src
+
+# Executa o build do projeto, gerando o arquivo JAR
+RUN mvn clean package
+
+# Runtime
+FROM eclipse-temurin:21-jre-alpine
+
+# Define o diretório de trabalho no container final
+WORKDIR /opt/app
+
+# Copia o JAR gerado na etapa de build para a imagem final
+COPY --from=build /opt/app/target/reciclagem-0.0.1-SNAPSHOT.jar /opt/app/app.jar
+
+# Define a variável de ambiente do profile (pode ser dev, prd, etc.)
+ENV PROFILE=prd
+
+# Expõe a porta 8080 (porta padrão da aplicação Spring Boot)
 EXPOSE 8080
 
-# Comando para rodar a aplicação quando o container iniciar
-ENTRYPOINT ["java","-jar","app.jar"]
+# Comando de inicialização, interpolando a variável PROFILE corretamente
+ENTRYPOINT ["java","-Dspring.profiles.active=${PROFILE}","-jar","app.jar"]
