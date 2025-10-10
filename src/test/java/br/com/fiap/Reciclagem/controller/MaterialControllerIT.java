@@ -34,7 +34,7 @@ import static org.hamcrest.Matchers.*;
 // Configurações base do Spring Boot para Testes de Integração
 @SpringBootTest(classes = ReciclagemApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
+@ActiveProfiles("prd")
 @Testcontainers
 public class MaterialControllerIT {
 
@@ -52,7 +52,7 @@ public class MaterialControllerIT {
     @Autowired
     private UserRepository userRepository;
 
-    // NOVO: INJEÇÃO DO REPOSITÓRIO DE MATERIAL
+    // INJEÇÃO DO REPOSITÓRIO DE MATERIAL
     @Autowired
     private MaterialRepository materialRepository;
 
@@ -78,8 +78,7 @@ public class MaterialControllerIT {
         // Garante que o Hibernate crie e drope as tabelas a cada execução de teste
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
 
-        // **3. Configuração da Secret JWT para Teste**
-        // Certifique-se de que o nome da propriedade corresponda ao que o seu TokenService usa (ex: jwt.secret)
+        // 3. Configuração da Secret JWT para Teste**
         registry.add("jwt.secret", () -> "chave_secreta_para_teste_minimo_32_chars_123456");
     }
 
@@ -88,7 +87,7 @@ public class MaterialControllerIT {
      */
     @BeforeEach
     void setupAuthentication() {
-        // CORREÇÃO: Limpa AMBAS as tabelas para garantir o isolamento total.
+        // Limpa AMBAS as tabelas para garantir o isolamento total.
         materialRepository.deleteAll(); // Limpa dados da tabela material
         userRepository.deleteAll();     // Limpa dados da tabela usuário (necessário para o setup)
 
@@ -97,7 +96,7 @@ public class MaterialControllerIT {
         user.setName("Teste IT");
         user.setEmail(TEST_EMAIL);
         user.setPassword(TEST_PASSWORD_BCRYPT);
-        // CORREÇÃO: Usando a role ADMIN, que geralmente tem permissão para POST/PUT/DELETE
+        // Usando a role ADMIN, que geralmente tem permissão para POST/PUT/DELETE
         user.setRole(UserRole.ADMIN);
 
         User savedUser = userRepository.save(user);
