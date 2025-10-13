@@ -102,7 +102,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>br.dev.celso.reciclagem.ReciclagemApplication</mainClass>
+                    <mainClass>br/com/fiap/Reciclagem/ReciclagemApplication.java</mainClass>
                     <layers>
                         <enabled>true</enabled>
                     </layers>
