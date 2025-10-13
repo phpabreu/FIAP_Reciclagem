@@ -12,7 +12,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>br.dev.celso</groupId>
+    <groupId>br.com.fiap</groupId>
     <artifactId>reciclagem</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>reciclagem</name>
@@ -102,7 +102,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>br/com/fiap/Reciclagem/ReciclagemApplication.java</mainClass>
+                    <mainClass>br.com.fiap.Reciclagem.ReciclagemApplication</mainClass>
                     <layers>
                         <enabled>true</enabled>
                     </layers>
