@@ -1,11 +1,11 @@
-version: '3.8'  # Define a versão do Compose, compatível com recursos modernos
+version: '3.8'
 
 services:
   db:  # Serviço de banco de dados
-    container_name: mysql  # Nome do container (opcional)
+    container_name: mysql  # Nome do container
     image: mysql:8.0  # Imagem oficial do MySQL
     ports:
-      - "3306:3306"  # Expõe a porta padrão do MySQL
+      - "3306:3306"  # porta padrão do MySQL
     environment:
       MYSQL_ROOT_PASSWORD: root_pass  # Senha do usuário root
       MYSQL_DATABASE: api             # Cria o banco de dados "api"

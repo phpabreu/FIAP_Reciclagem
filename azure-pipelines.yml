@@ -1,18 +1,46 @@
-# Starter pipeline
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+# nao usada pois a nossa conta estudante nao tem acesso ao azure container registry
 
-trigger:
-- master
 
-pool:
-  vmImage: ubuntu-latest
-
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+#trigger:
+#  - main
+#
+#pool:
+#  vmImage: ubuntu-latest
+#
+#steps:
+#  # 1. Run tests
+#  - task: Maven@4
+#    inputs:
+#      mavenPomFile: 'pom.xml'
+#      goals: 'clean verify'
+#    displayName: 'Run Maven tests'
+#
+#  # 2. Build Docker image
+#  - task: DockerCompose@0
+#    displayName: 'Build Docker image'
+#    inputs:
+#      containerregistrytype: 'Azure Container Registry'
+#      azureSubscription: '<your-service-connection>'
+#      azureContainerRegistry: '<yourregistry>.azurecr.io'
+#      dockerComposeFile: '**/docker-compose.yml'
+#      action: 'Run a Docker Compose command'
+#      command: 'build'
+#
+#  # 3. Push image
+#  - task: DockerCompose@0
+#    displayName: 'Push Docker image to ACR'
+#    inputs:
+#      containerregistrytype: 'Azure Container Registry'
+#      azureSubscription: '<your-service-connection>'
+#      azureContainerRegistry: '<yourregistry>.azurecr.io'
+#      dockerComposeFile: '**/docker-compose.yml'
+#      action: 'Run a Docker Compose command'
+#      command: 'push'
+#
+#  # 4. Deploy to Azure App Service (example)
+#  - task: AzureWebApp@1
+#    displayName: 'Deploy to Azure App Service'
+#    inputs:
+#      azureSubscription: '<your-service-connection>'
+#      appName: '<your-app-service-name>'
+#      images: '<yourregistry>.azurecr.io/reciclagem-api:latest'

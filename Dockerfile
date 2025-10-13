@@ -23,7 +23,7 @@ WORKDIR /opt/app
 # Copia o JAR gerado na etapa de build para a imagem final
 COPY --from=build /opt/app/target/reciclagem-0.0.1-SNAPSHOT.jar /opt/app/app.jar
 
-# Define a variável de ambiente do profile (pode ser dev, prd, etc.)
+# Define a variável de ambiente do profile (pode ser dev, prd)
 ENV PROFILE=prd
 
 # Expõe a porta 8080 (porta padrão da aplicação Spring Boot)
