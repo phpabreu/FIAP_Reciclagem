@@ -1,46 +1,40 @@
-# nao usada pois a nossa conta estudante nao tem acesso ao azure container registry
+trigger:
+  branches:
+    include:
+      - master
 
+pool:
+  vmImage: 'ubuntu-latest'
 
-#trigger:
-#  - main
-#
-#pool:
-#  vmImage: ubuntu-latest
-#
-#steps:
-#  # 1. Run tests
-#  - task: Maven@4
-#    inputs:
-#      mavenPomFile: 'pom.xml'
-#      goals: 'clean verify'
-#    displayName: 'Run Maven tests'
-#
-#  # 2. Build Docker image
-#  - task: DockerCompose@0
-#    displayName: 'Build Docker image'
-#    inputs:
-#      containerregistrytype: 'Azure Container Registry'
-#      azureSubscription: '<your-service-connection>'
-#      azureContainerRegistry: '<yourregistry>.azurecr.io'
-#      dockerComposeFile: '**/docker-compose.yml'
-#      action: 'Run a Docker Compose command'
-#      command: 'build'
-#
-#  # 3. Push image
-#  - task: DockerCompose@0
-#    displayName: 'Push Docker image to ACR'
-#    inputs:
-#      containerregistrytype: 'Azure Container Registry'
-#      azureSubscription: '<your-service-connection>'
-#      azureContainerRegistry: '<yourregistry>.azurecr.io'
-#      dockerComposeFile: '**/docker-compose.yml'
-#      action: 'Run a Docker Compose command'
-#      command: 'push'
-#
-#  # 4. Deploy to Azure App Service (example)
-#  - task: AzureWebApp@1
-#    displayName: 'Deploy to Azure App Service'
-#    inputs:
-#      azureSubscription: '<your-service-connection>'
-#      appName: '<your-app-service-name>'
-#      images: '<yourregistry>.azurecr.io/reciclagem-api:latest'
+variables:
+  appName: 'reciclagem-app'
+  azureServiceConnection: 'Azure for Students (24e40e5e-6a9a-4863-9ec5-372dd1374a1c)'
+  dockerImageName: 'reciclagem-app-image'
+
+steps:
+  # Maven build + test
+  - task: Maven@4
+    displayName: 'Run Maven tests'
+    inputs:
+      mavenPomFile: 'pom.xml'
+      goals: 'clean verify'
+      publishJUnitResults: true
+      testResultsFiles: '**/surefire-reports/TEST-*.xml'
+
+  #  Build Docker image
+  - task: Docker@2
+    displayName: 'Build Docker image'
+    inputs:
+      command: 'build'
+      Dockerfile: '**/Dockerfile'
+      tags: |
+        $(dockerImageName):$(Build.BuildId)
+
+  # Deploy Docker image directly to Azure App Service (no ACR)
+  - task: AzureWebAppContainer@1
+    displayName: 'Deploy to Azure Web App for Containers'
+    inputs:
+      azureSubscription: '$(azureServiceConnection)'
+      appName: '$(appName)'
+      containers: |
+        $(dockerImageName):$(Build.BuildId)
