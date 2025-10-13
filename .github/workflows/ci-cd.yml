@@ -1,5 +1,5 @@
 name: CI-CD Pipeline
-
+run-name: ${{ github.actor }} está rodando a nova pipeline.
 on:
   push:
     branches:
@@ -30,7 +30,7 @@ jobs:
     steps:
       # 1️⃣ Checkout code
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
       # 2️⃣ Set up Java (Maven)
       - name: Set up Java
