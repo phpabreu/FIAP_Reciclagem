@@ -3,10 +3,10 @@ run-name: ${{ github.actor }} está rodando a nova pipeline.
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   build:
