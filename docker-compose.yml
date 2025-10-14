@@ -2,17 +2,17 @@ version: '3.8'
 
 services:
   db:  # Serviço de banco de dados
-    container_name: mysql  # Nome do container
-    image: mysql:8.0  # Imagem oficial do MySQL
+    container_name: sqlserver
+    image: mcr.microsoft.com/mssql/server:2019-latest
     ports:
-      - "3306:3306"  # porta padrão do MySQL
+      - "1433:1433"
     environment:
-      MYSQL_ROOT_PASSWORD: root_pass  # Senha do usuário root
-      MYSQL_DATABASE: api             # Cria o banco de dados "api"
+      ACCEPT_EULA: "Y" # Requisito obrigatório para SQL Server
+      SA_PASSWORD: "@Fiap2025@"
     volumes:
-      - db_data:/var/lib/mysql  # Volume para persistir os dados do banco
-    healthcheck:  # Verifica se o banco está pronto antes de subir a API
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      - db_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "SA", "-P", "@Fiap2025@", "-Q", "select 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -26,9 +26,9 @@ services:
         condition: service_healthy
     environment:
       - PROFILE=dev  # Define o perfil da aplicação
-      - DATABASE_URL=jdbc:mysql://db:3306/api?createDatabaseIfNotExist=true  # URL de conexão com o banco
-      - DATABASE_USER=root  # Usuário do banco
-      - DATABASE_PWD=root_pass  # Senha do banco
+      - DATABASE_URL=jdbc:sqlserver://db:1433;databaseName=api; # URL para SQL Server
+      - DATABASE_USER=SA # Usuário padrão do SQL Server
+      - DATABASE_PWD=@Fiap2025@
 
 volumes:
-  db_data:  # Volume nomeado para persistência dos dados do MySQL
+  db_data:  # Volume nomeado para persistência dos dados do SQL Server

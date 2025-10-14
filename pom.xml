@@ -21,6 +21,8 @@
     <properties>
         <java.version>21</java.version>
         <jacoco.version>0.8.12</jacoco.version>
+        <!-- Define o caminho para o arquivo de execução unificado do JaCoCo -->
+        <jacoco.exec.file>${project.build.directory}/jacoco.exec</jacoco.exec.file>
     </properties>
 
     <dependencies>
@@ -77,8 +79,7 @@
             <artifactId>mssqlserver</artifactId>
             <scope>test</scope>
         </dependency>
-
-
+        <!-- FIM DAS DEPENDÊNCIAS -->
     </dependencies>
 
     <build>
@@ -103,38 +104,101 @@
                 </executions>
             </plugin>
 
-            <!-- Jacoco -->
+            <!-- ========================================================= -->
+            <!-- 1. JACOCO (COBERTURA): Configuração para Unificar Relatórios -->
+            <!-- ========================================================= -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
                 <executions>
+                    <!-- Prepara o agente para Testes Unitários -->
                     <execution>
                         <id>default-prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
+                        <configuration>
+                            <!-- Garante que os dados de cobertura sejam anexados, não sobrescritos -->
+                            <append>true</append>
+                            <destFile>${jacoco.exec.file}</destFile>
+                        </configuration>
+                    </execution>
+                    <!-- Prepara o agente para Testes de Integração -->
+                    <execution>
+                        <id>default-prepare-agent-integration</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <append>true</append>
+                            <destFile>${jacoco.exec.file}</destFile>
+                            <!-- Define uma propriedade do sistema para o plugin Failsafe -->
+                            <propertyName>failsafeArgLine</propertyName>
+                        </configuration>
+                    </execution>
+                    <!-- Gera o relatório final após a fase de verificação (verify) -->
+                    <execution>
+                        <id>default-report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <dataFile>${jacoco.exec.file}</dataFile>
+                            <!-- O relatório XML é necessário para ferramentas de CI/CD -->
+                            <outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <!-- Configuração de Limite de Cobertura -->
+                    <execution>
+                        <id>check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.60</minimum> <!-- Exige 60% de cobertura de linha -->
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
+            <!-- FIM JACOCO -->
 
-            <!-- Surefire (testes unitários) -->
+            <!-- ========================================================= -->
+            <!-- 2. SUREFIRE (TESTES UNITÁRIOS) -->
+            <!-- ========================================================= -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.5</version>
+                <!-- Versão herdada do parent, removendo a versão 3.2.5 redundante -->
                 <configuration>
                     <excludes>
                         <exclude>**/*IT.java</exclude>
                     </excludes>
+                    <!-- Aplica o agente JaCoCo para Testes Unitários -->
+                    <argLine>${surefireArgLine}</argLine>
                 </configuration>
             </plugin>
+            <!-- FIM SUREFIRE -->
 
-            <!-- Failsafe (testes de integração) -->
+            <!-- ========================================================= -->
+            <!-- 3. FAILSAFE (TESTES DE INTEGRAÇÃO) -->
+            <!-- ========================================================= -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.2.5</version>
                 <executions>
                     <execution>
                         <goals>
@@ -143,7 +207,15 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <includes>
+                        <include>**/*IT.java</include>
+                    </includes>
+                    <!-- Aplica o agente JaCoCo para Testes de Integração -->
+                    <argLine>${failsafeArgLine}</argLine>
+                </configuration>
             </plugin>
+            <!-- FIM FAILSAFE -->
 
         </plugins>
     </build>
