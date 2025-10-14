@@ -1,9 +1,8 @@
 services:
   sqlserver:  # Serviço de banco de dados
     container_name: sqlserver
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    ports:
-      - "1433:1433"
+    image: mcr.microsoft.com/mssql/server:2017-latest
+
     environment:
       ACCEPT_EULA: "Y" # Requisito obrigatório para SQL Server
       SA_PASSWORD: "@Fiap2025@"
