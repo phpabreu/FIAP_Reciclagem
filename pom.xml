@@ -23,15 +23,6 @@
         <jacoco.version>0.8.12</jacoco.version>
     </properties>
 
-    <repositories>
-        <!-- Repositório oficial da Oracle para baixar ojdbc8 -->
-        <repository>
-            <id>oracle-repo</id>
-            <name>Oracle Maven Repository</name>
-            <url>https://maven.oracle.com</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <!-- Spring Boot -->
         <dependency>
@@ -83,7 +74,8 @@
 
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>mssqlserver</artifactId> <scope>test</scope>
+            <artifactId>mssqlserver</artifactId>
+            <scope>test</scope>
         </dependency>
 
 

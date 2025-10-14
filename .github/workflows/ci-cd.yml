@@ -60,7 +60,7 @@ jobs:
       # 6️⃣ Push da Imagem para o Docker Hub
       - name: Push da Imagem para o Docker Hub
         run: |
-          DOCKER_IMAGE_NAME="phpabreu/reciclagem-app" # <-- MUDE ISTO
+          DOCKER_IMAGE_NAME="phpabreu/reciclagem-app"
           docker push ${DOCKER_IMAGE_NAME}:${{ github.sha }}
           docker push ${DOCKER_IMAGE_NAME}:latest
 
