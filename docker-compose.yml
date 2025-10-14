@@ -1,20 +1,19 @@
-version: '3.8'
-
 services:
-  db:  # Serviço de banco de dados
+  sqlserver:  # Serviço de banco de dados
     container_name: sqlserver
-    image: mcr.microsoft.com/mssql/server:2019-latest
+    image: mcr.microsoft.com/mssql/server:2022-latest
     ports:
       - "1433:1433"
     environment:
       ACCEPT_EULA: "Y" # Requisito obrigatório para SQL Server
       SA_PASSWORD: "@Fiap2025@"
+      MSSQL_PID: Developer
     volumes:
       - db_data:/var/opt/mssql
     healthcheck:
       test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "SA", "-P", "@Fiap2025@", "-Q", "select 1"]
-      interval: 10s
-      timeout: 5s
+      interval: 15s
+      timeout: 10s
       retries: 5
 
   api:  # Serviço da aplicação
@@ -22,11 +21,11 @@ services:
     ports:
       - "8080:8080"  # Mapeia a porta da aplicação
     depends_on:  # Aguarda o banco de dados estar saudável
-      db:
+      sqlserver:
         condition: service_healthy
     environment:
       - PROFILE=dev  # Define o perfil da aplicação
-      - DATABASE_URL=jdbc:sqlserver://db:1433;databaseName=api; # URL para SQL Server
+      - DATABASE_URL=jdbc:sqlserver://sqlserver:1433;databaseName=api;encrypt=false;trustServerCertificate=true; # URL para SQL Server
       - DATABASE_USER=SA # Usuário padrão do SQL Server
       - DATABASE_PWD=@Fiap2025@
 
