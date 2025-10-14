@@ -40,10 +40,10 @@ class AuthorizationServiceTest {
         // Quando userRepository.findByEmail for chamado com o 'email', ele deve retornar o 'userSimulado'.
         when(userRepository.findByEmail(email)).thenReturn(userSimulado);
 
-        // ACT (Ação)
+        // Ação
         UserDetails userDetails = authorizationService.loadUserByUsername(email);
 
-        // ASSERT (Verificação)
+        // Verificação
         // 1. Verifica se o resultado não é nulo.
         assertNotNull(userDetails, "UserDetails não deve ser nulo.");
         // 2. Verifica se o nome de usuário (e-mail) retornado é o mesmo.
@@ -57,14 +57,14 @@ class AuthorizationServiceTest {
     @Test
     @DisplayName("Deve lançar UsernameNotFoundException quando o e-mail não for encontrado")
     void loadUserByUsername_Falha() {
-        // ARRANGE (Preparação)
+        // Preparação
         String email = "naoexiste@exemplo.com";
 
         // Define o comportamento do Mock:
         // Quando userRepository.findByEmail for chamado, ele deve retornar null (usuário não encontrado).
         when(userRepository.findByEmail(email)).thenReturn(null);
 
-        // ACT & ASSERT (Ação e Verificação combinadas)
+        // Ação e Verificação combinadas
         // Verifica se o metodo lança a exceção esperada (UsernameNotFoundException)
         assertThrows(UsernameNotFoundException.class, () -> {
             authorizationService.loadUserByUsername(email);

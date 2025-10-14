@@ -67,7 +67,7 @@ public class MaterialControllerIT {
     public static MSSQLServerContainer<?> sqlServerContainer = new MSSQLServerContainer<>(
             "mcr.microsoft.com/mssql/server:2019-latest"
     )
-            // SQL Server exige senha forte (mínimo 8 caracteres, complexa)
+            // SQL Server
             .withPassword("@Fiap2025@")
             // Requisito do Docker para aceitar o Contrato de Licença de Usuário Final (EULA)
             .withEnv("ACCEPT_EULA", "Y");
@@ -123,19 +123,19 @@ public class MaterialControllerIT {
     @Test
     @DisplayName("POST /material/register deve criar material com token e retornar 201 CREATED")
     void criarMaterial_Retorna201() throws Exception {
-        // ARRANGE (Preparação)
+        // Preparação
         String token = getValidJwtToken();
 
         Material novoMaterial = new Material();
         novoMaterial.setNomeMaterial("Papel");
 
-        // Acao: Simula uma requisição POST
+        // Açao: Simula uma requisição POST
         ResultActions result = mockMvc.perform(post("/material/register")
                 .header("Authorization", "Bearer " + token) // Envia o JWT
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(novoMaterial)));
 
-        // ASSERT (Verificação)
+        // Verificação
         result.andExpect(status().isCreated())
                 .andExpect(jsonPath("$.idMaterial").exists())
                 .andExpect(jsonPath("$.nomeMaterial", is("Papel")));
@@ -146,7 +146,7 @@ public class MaterialControllerIT {
     @Test
     @DisplayName("GET /material deve retornar lista vazia (200 OK) com token válido")
     void getAllMaterials_ListaVazia() throws Exception {
-        // ARRANGE
+        // Preparaçao
         String token = getValidJwtToken();
 
         // Acao: Simula a requisição GET
@@ -154,7 +154,7 @@ public class MaterialControllerIT {
                 .header("Authorization", "Bearer " + token) // Envia o JWT
                 .contentType(MediaType.APPLICATION_JSON));
 
-        // ASSERT (Verificação)
+        // Verificação
         // Como limpamos a tabela no @BeforeEach, esperamos que a lista esteja vazia.
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
