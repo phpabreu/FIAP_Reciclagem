@@ -4,7 +4,7 @@ import br.com.fiap.Reciclagem.ReciclagemApplication;
 import br.com.fiap.Reciclagem.model.Material;
 import br.com.fiap.Reciclagem.model.User;
 import br.com.fiap.Reciclagem.model.UserRole;
-import br.com.fiap.Reciclagem.repository.MaterialRepository; // NOVO IMPORT
+import br.com.fiap.Reciclagem.repository.MaterialRepository;
 import br.com.fiap.Reciclagem.repository.UserRepository;
 import br.com.fiap.Reciclagem.config.security.TokenService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,7 +20,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -52,39 +52,47 @@ public class MaterialControllerIT {
     @Autowired
     private UserRepository userRepository;
 
-    // INJEÇÃO DO REPOSITÓRIO DE MATERIAL
+    // INJECAO DO REPOSITORIO DE MATERIAL
     @Autowired
     private MaterialRepository materialRepository;
 
-    // Constantes para o usuário de teste
+    // Constantes para o usuario de teste
     private static final String TEST_EMAIL = "testejwt@fiap.com";
-    // Senha 'senha123' codificada com BCrypt. Use uma senha real do seu ambiente.
     private static final String TEST_PASSWORD_BCRYPT = "$2a$10$wT5Hq2tY6x5g9uT1sA9uX.Y2K5k0c5j7t5s2m8k4j0d4h7i3l0m8c2a";
     private String validJwtToken;
 
     // 1. Configura e inicia o container MySQL (Testcontainers)
     @Container
-    public static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0")
-            .withDatabaseName("testdb")
-            .withUsername("testuser")
-            .withPassword("testpass");
+// usa a imagem oficial da Microsoft para SQL Server no Docker
+    public static MSSQLServerContainer<?> sqlServerContainer = new MSSQLServerContainer<>(
+            "mcr.microsoft.com/mssql/server:2019-latest"
+    )
+            // SQL Server exige senha forte (mínimo 8 caracteres, complexa)
+            .withPassword("@Fiap2025@")
+            // Requisito do Docker para aceitar o Contrato de Licença de Usuário Final (EULA)
+            .withEnv("ACCEPT_EULA", "Y");
 
     // 2. Sobrescreve as propriedades de conexão do Spring com as do Container
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysqlContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", mysqlContainer::getUsername);
-        registry.add("spring.datasource.password", mysqlContainer::getPassword);
+        // Adiciona o driver SQL Server para o Hibernate (essencial para o dialeto)
+        registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.SQLServerDialect");
+
+        // Configurações do Banco de Dados usando o Testcontainer do SQL Server
+        registry.add("spring.datasource.url", sqlServerContainer::getJdbcUrl);
+        registry.add("spring.datasource.username", sqlServerContainer::getUsername);
+        registry.add("spring.datasource.password", sqlServerContainer::getPassword);
+
         // Garante que o Hibernate crie e drope as tabelas a cada execução de teste
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
 
-        // 3. Configuração da Secret JWT para Teste**
+        // 3. Configuração da Secret JWT para Teste
         registry.add("jwt.secret", () -> "chave_secreta_para_teste_minimo_32_chars_123456");
     }
 
-    /**
-     * Roda antes de CADA teste. Cria o usuário no DB de teste e gera o token JWT válido.
-     */
+
+    //  Roda antes de CADA teste. Cria o usuário no DB de teste e gera o token JWT valido.
+
     @BeforeEach
     void setupAuthentication() {
         // Limpa AMBAS as tabelas para garantir o isolamento total.
@@ -96,7 +104,6 @@ public class MaterialControllerIT {
         user.setName("Teste IT");
         user.setEmail(TEST_EMAIL);
         user.setPassword(TEST_PASSWORD_BCRYPT);
-        // Usando a role ADMIN, que geralmente tem permissão para POST/PUT/DELETE
         user.setRole(UserRole.ADMIN);
 
         User savedUser = userRepository.save(user);
@@ -105,7 +112,7 @@ public class MaterialControllerIT {
         this.validJwtToken = tokenService.generateToken(savedUser);
     }
 
-    /** Helper para retornar o token JWT gerado no setup. */
+    // Helper para retornar o token JWT gerado no setup.
     private String getValidJwtToken() {
         return this.validJwtToken;
     }
@@ -122,7 +129,7 @@ public class MaterialControllerIT {
         Material novoMaterial = new Material();
         novoMaterial.setNomeMaterial("Papel");
 
-        // ACT (Ação): Simula uma requisição POST
+        // Acao: Simula uma requisição POST
         ResultActions result = mockMvc.perform(post("/material/register")
                 .header("Authorization", "Bearer " + token) // Envia o JWT
                 .contentType(MediaType.APPLICATION_JSON)
@@ -142,7 +149,7 @@ public class MaterialControllerIT {
         // ARRANGE
         String token = getValidJwtToken();
 
-        // ACT (Ação): Simula a requisição GET
+        // Acao: Simula a requisição GET
         ResultActions result = mockMvc.perform(get("/material")
                 .header("Authorization", "Bearer " + token) // Envia o JWT
                 .contentType(MediaType.APPLICATION_JSON));
